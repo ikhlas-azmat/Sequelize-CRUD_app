@@ -21,3 +21,15 @@ app.get('/users', UserCtrl.getUsers);
 app.get('/users/:id', UserCtrl.getUserById);
 
 app.post('/users/', UserCtrl.createUser);
+
+app.delete('/users/:id', UserCtrl.deleteUser);
+
+app.patch('/users/:id', UserCtrl.patchUser);
+
+app.post('/queryPractice', UserCtrl.createUserColumn);
+app.get('/queryPractice', UserCtrl.selectAllFromColumn
+);
+app.get('/queryPractice/selectAsAlias', UserCtrl.selectAsAlias
+);
+app.get('/queryPractice/countAs', UserCtrl.countId
+);

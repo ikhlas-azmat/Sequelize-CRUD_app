@@ -1,26 +1,7 @@
+const { Sequelize, Op } = require("sequelize");
 const db = require("../models");
 
 var User = db.user;
-
-// const addUser = async(req, res) => {
-// // const data = await User.create({user_name: "User 2", age: 21});
-// const data = User.build({user_name: "User 1", age: 19});
-// console.log(data instanceof User);
-// console.log(data.user_name);
-// // data.set({
-// //     user_name: "newUser",
-// //     age: 97
-// // })
-// // await data.update({
-// //     user_name: "newUser Update",
-// //     age: 56
-// // })
-// // await data.save();
-// await data.destroy();
-// console.log("Data saved in the database");
-// console.log(data.toJSON());
-// res.status(200).json(data.toJSON());
-// }
 
 const getUsers= async(req,res) => {
     const data = await User.findAll({});
@@ -38,7 +19,7 @@ const getUserById= async(req,res) => {
 
 const createUser= async(req,res) => {
     const postData = req.body;
-    if(postData.lenght>1){
+    if(postData.length>1){
     var data = await User.bulkCreate(postData);
 }
 else{
@@ -47,9 +28,73 @@ else{
     res.status(200).json({data: data});
 }
 
+const deleteUser = async(req, res) => {
+    const data = await User.destroy({
+        where: {
+            id: req.params.id
+        }
+    })
+    res.status(200).json({data: data})
+}
+
+const patchUser = async(req, res) => {
+    const updatedData = req.body;
+    const data = await User.update(updatedData, {
+        where: {
+            id: req.params.id
+        }
+    })
+    res.status(200).json({data: data});
+}
+
+const createUserColumn = async(req, res) => {
+    const postData = req.body;
+    const data = await User.create({
+        user_name: postData.user_name,
+        age: postData.age
+    }, {
+        fields: ['user_name', 'age']
+    })
+    res.status(200).json({data: data})
+}
+
+const selectAllFromColumn = async (req, res) => {
+    const data = await User.findAll({
+        attributes: ['id', 'user_name']
+    })
+    res.status(200).json({data: data})
+}
+
+const selectAsAlias = async (req, res) => {
+    const data = await User.findAll({
+        attributes: [["id", "Serial No"], ["user_name", "User Name"]]
+    })
+    res.status(200).json({data: data})
+}
+
+const countId = async(req, res) => {
+    const data = await User.findAll({
+        attributes: {
+            exclude: [
+                'age', 'createdAt', 'updatedAt'
+            ],
+            include: [
+                [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
+            ]
+        }
+        // attributes: ['id', ["user_name", "User Name"], [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']]
+    })
+    res.status(200).json({data: data})
+}
+
 module.exports = {
-    // addUser,
     getUsers,
     getUserById,
-    createUser
+    createUser,
+    deleteUser,
+    patchUser,
+    createUserColumn,
+    selectAllFromColumn,
+    selectAsAlias,
+    countId
 }
