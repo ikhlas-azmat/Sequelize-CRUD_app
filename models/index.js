@@ -20,6 +20,6 @@ db.sequelize = sequelize;
 
 db.user = require("./user")(sequelize,DataTypes);
 db.contact = require("./contact")(sequelize,DataTypes);
-db.sequelize.sync();
+db.sequelize.sync({force: false});
 
 module.exports = db;

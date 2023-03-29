@@ -33,3 +33,5 @@ app.get('/queryPractice/selectAsAlias', UserCtrl.selectAsAlias
 );
 app.get('/queryPractice/countAs', UserCtrl.countId
 );
+app.get('/queryPractice/Operator', UserCtrl.Operator
+);

@@ -6,7 +6,36 @@ const User = sequelize.define('User', {
     },
     age: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true,
+        defaultValue: 0
+    },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+        validate: {
+            isEmail: {
+                args: true,
+                msg: "Invalid Email Format"
+            },
+        }
+    },
+    contactno:{
+        type: DataTypes.BIGINT,
+        allowNull: false,
+        unique: true,
+        validate:{
+            is: /^[3]{1}[0-9]{9}$/
+            // is: /^[0]{1}[3]{1}[0-9]{9}$/
+        }
+    },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate:{
+            min: 8,
+            max: 23
+        }
     }
 }, {
     tableName: "users",
