@@ -20,6 +20,21 @@ db.sequelize = sequelize;
 
 db.user = require("./user")(sequelize,DataTypes);
 db.contact = require("./contact")(sequelize,DataTypes);
+db.userContacts = require("./user_contacts")(sequelize, DataTypes, db.user, db.contact);
+
+// db.user.hasOne(db.contact);
+// db.contact.belongsTo(db.user);
+
+// db.user.hasMany(db.contact);
+// db.contact.belongsTo(db.user);
+
+// db.user.belongsToMany(db.contact, { through: 'user_contacts'})
+// db.contact.belongsToMany(db.user, { through: 'user_contacts'})
+
+
+db.user.belongsToMany(db.contact, { through: db.userContacts })
+db.contact.belongsToMany(db.user, { through: db.userContacts })
+
 db.sequelize.sync({force: false});
 
 module.exports = db;

@@ -7,9 +7,13 @@ module.exports = (sequelize, DataTypes) => {
         current_address: {
             type: DataTypes.STRING,
             allowNull: false
-        }
+        },
+        // userId: {
+        //     type: DataTypes.INTEGER,
+        //     allowNull: false
+        // }
     }, {
-    
+        timestamps: false
     })
     return Contact;
 }

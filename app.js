@@ -35,3 +35,17 @@ app.get('/queryPractice/countAs', UserCtrl.countId
 );
 app.get('/queryPractice/Operator', UserCtrl.Operator
 );
+app.get('/query', UserCtrl.rawQueries
+);
+
+app.post('/one-to-one', UserCtrl.createOneToOneUser);
+app.get('/one-to-one', UserCtrl.fetchOneToOneUser);
+
+app.post('/one-to-many', UserCtrl.createOneToManyUser);
+app.get('/one-to-many', UserCtrl.fetchOneToManyUser);
+
+// app.post('/many-to-many', UserCtrl.createManyToManyUserthrough);
+// app.get('/many-to-many', UserCtrl.findManyToManyUserthrough);
+
+app.post('/many-to-many', UserCtrl.createManyToManyUser);
+app.get('/many-to-many', UserCtrl.findManyToManyUser);

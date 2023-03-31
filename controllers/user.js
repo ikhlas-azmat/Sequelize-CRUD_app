@@ -1,8 +1,9 @@
-const { Sequelize, Op } = require("sequelize");
+const { Sequelize, Op, QueryTypes } = require("sequelize");
 const db = require("../models");
 const bcrypt = require('bcrypt');
 
 var User = db.user;
+var Contact = db.contact;
 
 const getUsers= async(req,res) => {
     const data = await User.findAll({});
@@ -20,7 +21,7 @@ const getUserById= async(req,res) => {
 
 const createUser= async(req,res) => {
     try {
-        const {user_name, age, email, contactno, password} = req.body;
+        const {user_name, gender, age, email, contactno, password} = req.body;
         const postData = req.body;
         const salt = await bcrypt.genSalt(10);
         const hashPassword = await bcrypt.hash(password, salt)
@@ -37,6 +38,7 @@ const createUser= async(req,res) => {
         else{
             var data = await User.create({
                 user_name,
+                gender,
                 age,
                 email,
                 contactno,
@@ -71,14 +73,16 @@ const patchUser = async(req, res) => {
 
 const createUserColumn = async(req, res) => {
     try {
-        const {user_name, email, contactno, password} = req.body;
+        console.log(req.body);
+        const {user_name, gender, email, contactno, password} = req.body;
         const data = await User.create({
             user_name,
+            gender,
             email,
             contactno,
             password
         }, {
-            fields: ['user_name', 'email', 'contactno', 'password']
+            fields: ['user_name', 'gender', 'email', 'contactno', 'password']
         })
         res.status(200).json({data: data}) 
     } 
@@ -136,6 +140,128 @@ const countId = async(req, res) => {
     res.status(200).json({data: data})
 }
 
+const rawQueries = async (req, res) => {
+    const users = await db.sequelize.query("SElECT * FROM users", {type: QueryTypes.SELECT})
+    res.json({users})
+}
+
+const createOneToOneUser = async(req, res) => {
+    const {user_name, permanent_address, current_address} = req.body
+    const data = await User.create({user_name: user_name}, {fields: ["user_name"]});
+    if(data && data.id){
+        await Contact.create({permanent_address: permanent_address, current_address: current_address, UserId: data.id})
+    }
+    res.json({data:data})
+}
+
+const fetchOneToOneUser = async(req, res) => {
+    // const data = await User.findAll({
+    //     attributes: ['user_name'],
+    //     include: [{
+    //         model: Contact,
+    //         attributes: ['permanent_address', 'current_address']
+    //     }],
+    //     where: {id: 1}
+    // });
+    const data = await Contact.findAll({
+        attributes: ['permanent_address', 'current_address'],
+        include: [{
+            model: User,
+            attributes: ['user_name']
+        }],
+        where: {id: 1}
+    });
+    res.json({data: data})
+}
+
+const createOneToManyUser = async(req,res) =>{
+    const {user_name, permanent_address, current_address, UserId} = req.body;
+    const data = await User.create({
+        user_name: user_name
+    }, {
+        fields: ['user_name']
+    });
+    if(data.id){
+        await Contact.create({
+            permanent_address: permanent_address, 
+            current_address: current_address, 
+            UserId: UserId
+        })
+    }
+    res.json({data: data})
+}
+
+const fetchOneToManyUser = async(req, res) => {
+    // const data = await User.findAll({
+    //     attributes: ['user_name'],
+    //     include: {
+    //         model: Contact,
+    //         attributes: ["permanent_address", 'current_address']
+    //     },
+    //     where: { id: 2}
+    // })
+    const data = await Contact.findAll({
+        attributes: ["permanent_address", 'current_address'],
+        include: {
+            model: User,
+            attributes: ['user_name']
+        },
+        // where: { id: 2}
+    })
+    res.json({data: data})
+}
+
+// const createManyToManyUserthrough = async ( req, res) => {
+//     const {user_name, permanent_address, current_address} = req.body;
+//     const data = await User.create({user_name: user_name}, 
+//         {fields: ['user_name']}
+//         )
+//         if (data) {
+//             await Contact.create({permanent_address: permanent_address, current_address: current_address})
+//         }
+//         res.json(data)
+// }
+
+// const findManyToManyUserthrough = async (req, res) => {
+//     const data = await Contact.findAll({
+//         attributes: ['permanent_address', 'current_address'],
+//         include: {
+//             model: User,
+//             attributes: ['user_name']
+//         }
+//     })
+//     res.json({data: data})
+// }
+
+const createManyToManyUser = async ( req, res) => {
+    const {user_name, permanent_address, current_address} = req.body;
+    const data = await User.create({user_name: user_name}, 
+        {fields: ['user_name']}
+        )
+        if (data) {
+            await Contact.create({permanent_address: permanent_address, current_address: current_address})
+        }
+        res.json({data:data})
+}
+
+const findManyToManyUser = async (req, res) => {
+    // const data = await User.findAll({
+    //     attributes: ['user_name'],
+    //     include: {
+    //         model: Contact,
+    //         attributes: ['permanent_address', 'current_address'],
+    //     }
+    // })
+    const data = await Contact.findAll({
+        attributes: ['permanent_address', 'current_address'],
+        include: {
+            model: User,
+            attributes: ['user_name'],
+        }
+    })
+    res.json({data: data})
+}
+
 module.exports = {
     getUsers,
     getUserById,
@@ -146,5 +272,12 @@ module.exports = {
     selectAllFromColumn,
     selectAsAlias,
     countId,
-    Operator
+    Operator,
+    rawQueries,
+    createOneToOneUser,
+    fetchOneToOneUser,
+    createOneToManyUser,
+    fetchOneToManyUser,
+    findManyToManyUser,
+    createManyToManyUser
 }
